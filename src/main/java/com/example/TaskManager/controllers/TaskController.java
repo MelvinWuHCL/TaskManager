@@ -18,105 +18,113 @@ import com.example.TaskManager.services.*;
 
 @Controller
 public class TaskController {
-	
-	
-	@Autowired 
+
+	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private TaskService taskService;
-	
-	private Logger log = LoggerFactory.getLogger(TaskController.class);
-	
 
-	@GetMapping(value="/")
-    public String showHome() {  
+	private Logger log = LoggerFactory.getLogger(TaskController.class);
+
+	@GetMapping(value = "/")
+	public String showHome() {
 		log.info("Starting up project");
 		return "Home";
-    }
-	
-	@GetMapping(value="/loginform")
-    public String showLogin() {  
+	}
+
+	@GetMapping(value = "/loginform")
+	public String showLogin() {
 		log.info("Going to login");
 		return "LoginForm";
-    }
-	
-	@GetMapping(value="/registerform")
-    public String showRegister() {  
+	}
+
+	@GetMapping(value = "/registerform")
+	public String showRegister() {
 		log.info("Going to register");
 		return "RegisterForm";
-    }
-	
-	@GetMapping(value="/LoginForm")
+	}
+
+	@GetMapping(value = "/LoginForm")
 	public String showLoginSuccess() {
 		log.info("Successful Login");
 		return "LoginSuccess";
 	}
-	
-	@GetMapping(value="/taskform")
+
+	@GetMapping(value = "/taskform")
 	public String showTask() {
-		log.info("Going to task manager");
+		log.info("Going to task generator");
 		return "TaskForm";
 	}
-	
-	
-	@PostMapping(value="/login")
+
+	@GetMapping(value = "list")
+	public String showListOfTasks() {
+		log.info("Showing tasks");
+		return "ListOfTasks";
+	}
+
+	@PostMapping(value = "/login")
 	public String checkLogin(ModelMap m, @RequestParam String username, @RequestParam String password) {
 		log.info("logging in...");
-		if (userService.getPassword(username, password) == false) {
+		if (userService.getPassword(username, password) == false || username.equals(" ") || password.equals(" "))  {
 			log.info("login denied");
 			return "denied";
 		} else {
 			log.info("login accepted");
-			m.addAttribute("user",username);
+			m.addAttribute("user", username);
 			log.info("username: " + username);
 			return "LoginSuccess";
 		}
 	}
-	
-	@PostMapping(value="/register")
-    public String registerUser(ModelMap m, @RequestParam String username, @RequestParam String email, @RequestParam String password) {
-		
-    	log.info("Starting registration");
-    	User user = new User();
-    	user.setName(username);
-    	user.setEmail(email);
-    	user.setPassword(password);
-    	userService.save(user);
-    	m.addAttribute("user", user);
-    	return "RegisterSuccess";
-    }
-	
+
+	@PostMapping(value = "/register")
+	public String registerUser(ModelMap m, @RequestParam String username, @RequestParam String email,
+			@RequestParam String password) {
+		if (username.equals(" ") || password.equals(" ") || email.equals(" ")) {
+			return "denied";
+		} else {
+			log.info("Starting registration");
+
+			User user = new User();
+			user.setName(username);
+			user.setEmail(email);
+			user.setPassword(password);
+			userService.save(user);
+			m.addAttribute("user", user);
+			return "RegisterSuccess";
+		}
+	}
+
 	@GetMapping("/accessdenied")
-    public String denied() {
-    	log.info("Access denied");
-    	return "denied";
-    }
-	
-	@GetMapping(value="/success")
-    public String success() {
+	public String denied() {
+		log.info("Access denied");
+		return "denied";
+	}
 
-    	return "LoginSuccess";
-    }
-	
-	@RequestMapping(value="/taskcreate")
-    public String addTask(ModelMap m, @RequestParam String name, @RequestParam Date start, @RequestParam Date end,
-    								 @RequestParam String desc, @RequestParam String sev, @RequestParam String username) {
+	@GetMapping(value = "/success")
+	public String success() {
 
-    	log.info("start add tasks..." + username);
-    	User user = userService.getUserByName(username);
-    	Task task = new Task();
-    	task.setName(name);
-    	task.setStart(start);
-    	task.setEnd(end);
-    	task.setDesc(desc);
-    	task.setSeverity(sev);
-    	task.setUser(user);  
-    	m.addAttribute("task", task);
-    	m.addAttribute("user", username);
-    	taskService.save(task);
-    	
+		return "LoginSuccess";
+	}
+
+	@RequestMapping(value = "/taskcreate")
+	public String addTask(ModelMap m, @RequestParam String name, @RequestParam Date start, @RequestParam Date end,
+			@RequestParam String desc, @RequestParam String sev, @RequestParam String username) {
+
+		log.info("start add tasks..." + username);
+		User user = userService.getUserByName(username);
+		Task task = new Task();
+		task.setName(name);
+		task.setStart(start);
+		task.setEnd(end);
+		task.setDesc(desc);
+		task.setSeverity(sev);
+		task.setUser(user);
+		m.addAttribute("task", task);
+		m.addAttribute("user", username);
+		taskService.save(task);
+
 		return "TaskForm";
-    }
-	
+	}
+
 }
